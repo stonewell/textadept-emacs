@@ -7,7 +7,7 @@ M.state = {
 }
 
 function M.set_mark()
-  gui.statusbar_text = 'Mark set'
+  ui.statusbar_text = 'Mark set'
   M.state.mark = buffer.current_pos
 end
 

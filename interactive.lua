@@ -5,7 +5,7 @@ local I = {}
 -- Wouldn't it be great to be able to assign non-interactive functions
 -- to key bindings without having to write a wrapper to prompt the
 -- user for the correct arguments? For example, why should we define
--- gui.switch_buffer if we could bind view.goto_buffer directly to a
+-- ui.switch_buffer if we could bind view.goto_buffer directly to a
 -- key binding?  Or, how about binding buffer.search_next directly?
 -- Here are my bindings (on my ctl-t key chain).
 --
@@ -35,7 +35,7 @@ local I = {}
 --
 -- keys['cu'] = I.numeric_prefix
 -- keys['ct'] = {
---   d = function() I.wrap(gui.print, "Count:", I.NUMBER) end,
+--   d = function() I.wrap(ui.print, "Count:", I.NUMBER) end,
 -- }
 --
 -- I.NUMBER is replaced with the number specified as part of that
@@ -78,18 +78,18 @@ local I = {}
 -- Helper GUI Functions:
 
 -- Ideally, the next two functions should be added to textadept
--- proper's core/gui.lua as they provide a means to prompt the user
+-- proper's core/ui.lua as they provide a means to prompt the user
 -- for input. For example, one could ask for an arbitrary string,
--- using gui.input_box, that might be used as a search
+-- using ui.input_box, that might be used as a search
 -- string. Alternatively, one might want to prompt for a buffer using
--- gui.select_buffer, which is based entirely on the existing
--- gui.switch_buffer.
+-- ui.select_buffer, which is based entirely on the existing
+-- ui.switch_buffer.
 
 -- Prompt the user for a string. Returns the string or nil.
 function I.input_box(prompt, button, initial)
   button = button or 'Ok'
   initial = initial or ''
-  local result = gui.dialog('inputbox',
+  local result = ui.dialog('inputbox',
                             '--text', initial,
                             '--informative-text', prompt,
                             '--button1', button)
@@ -106,8 +106,9 @@ function I.select_buffer(prompt)
     items[#items + 1] = (buffer.dirty and '*' or '')..basename
     items[#items + 1] = filename
   end
-  local i = gui.filteredlist(_L[prompt], columns, items, true,
-                             NCURSES and {'--width', gui.size[1] - 2} or '--')
+
+  local i = ui.dialogs.list{title=_L[prompt], columns = columns, items = items}
+
   return i and _BUFFERS[i+1] or nil
 end
 

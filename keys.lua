@@ -2,21 +2,21 @@ local M = {}
 
 local E = require 'emacs.editing'
 local I = require 'emacs.interactive'
+local isearch = require 'isearch'
 
 local function m(path) return textadept.menu.menubar[path][2] end
 
 function nothing() end
 
 function M.enable()
-  keys['ctrl+s'] = function() keys.mode = 'find_incremental'; find_incr(); end  
-  keys['ctrl+r'] = function() keys.mode = 'find_incremental'; find_incr(); end  
+  keys['ctrl+s'] = function()
+    isearch.search.start_search(true, false)
+  end
+  keys['ctrl+r'] = function()
+        isearch.search.start_search(true, false)
+  end
 
-  -- Incremental search keymap (you need recent version of textadept)
-  keys.find_incremental = {
-    ['ctrl+s'] = ui.find.incremental,
-    ['\n'] = function() gui.command_entry.finish_mode(nothing) end,
-    ['esc'] = function() keys.mode = nil end
-  }
+ -- Incremental search keymap (you need recent version of textadept)
 
   -- keys.filter_through['\n'] =
   --   { ui.command_entry.finish_mode, textadept.editing.filter_through }
