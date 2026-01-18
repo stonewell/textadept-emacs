@@ -7,8 +7,13 @@ M.state = {
 }
 
 function M.set_mark()
-  ui.statusbar_text = 'Mark set'
-  M.state.mark = buffer.current_pos
+  M.cancel()
+
+  local deactivate = M.state.mark == buffer.current_pos
+  ui.statusbar_text = deactivate and 'Mark deactivate' or 'Mark set'
+  M.state.mark = deactivate and nil or buffer.current_pos
+
+  buffer.move_extends_selection = not deactivate
 end
 
 function M.save_mark(move_f)
@@ -17,8 +22,14 @@ function M.save_mark(move_f)
 end
 
 function M.exchange_caret_and_mark()
+  if M.state.mark == nil then
+    return
+  end
+
   buffer.current_pos, M.state.mark = M.state.mark, buffer.current_pos
   buffer:goto_pos(buffer.current_pos)
+  buffer:set_sel(math.min(M.state.mark, buffer.current_pos), math.max(M.state.mark, buffer.current_pos))
+  buffer.move_extends_selection = true
 end
 
 function M.line_end()
@@ -52,11 +63,13 @@ end
 function M.cut(beg, end_)
   buffer:set_sel(beg, end_)
   buffer:cut()
+  M.cancel()
 end
 
 function M.copy(beg, end_)
   buffer:set_sel(beg, end_)
   buffer:copy()
+  M.cancel()
 end
 
 -- Interactive functions
@@ -64,7 +77,7 @@ end
 -- We don't define this as part of interactive as it depends on
 -- M.state and I want the interactive module to be reusable by
 -- anyone even if they don't use other parts of the emacs module.
-M.RANGE = { I, function() return M.state.mark, buffer.current_pos end }
+M.RANGE = { I, function() return buffer.selection_start, buffer.selection_end end }
 
 function M.with_region(f,...)
   local args = table.pack(...)
@@ -80,5 +93,9 @@ function M.move_cut(move_f)
   end
 end
 
+function M.cancel()
+  buffer:cancel()
+  buffer:set_empty_selection(buffer.current_pos)
+end
 
 return M
